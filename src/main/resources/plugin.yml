@@ -1,0 +1,9 @@
+name: S8_RolePlay_Overhaul
+version: '${project.version}'
+main: net.s8gaming.s8_roleplay_overhaul.S8_RolePlay_Overhaul
+api-version: 1.18
+authors: [ FlossedMeat ]
+commands:
+  status:
+    description: Displays status of S8 Roleplay Overhaul modules.
+
