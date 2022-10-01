@@ -17,28 +17,31 @@ public class PlayerHandler implements Listener {
     private static S8_RolePlay_Overhaul plugin;
     private final DBInterface database;
     private final String dbTable;
-    String fullColumns = "(id, name, wallet, killsInLife, totalKills, " +
+    String fullColumns = "(id, name, wallet, killsInThisLife, totalKills, " +
             "longestLife, lastDeath, totalMobKills, mostKilledMob, " +
             "mostKilledMonster, distancedTraveled, blocksBroken, " +
-            "playerDeaths, playerDescription)";
+            "deaths, playerDescription)\n";
     public Map<String, PlayerObject> players;
     public PlayerConfig playerConfig;
     public PlayerHandler(S8_RolePlay_Overhaul instance, DBInterface database){
         plugin = instance;
         this.database = database;
-        dbTable = database.getDBTablePrefix() + "_players";
+        this.dbTable = database.getDBTablePrefix() + "_players";
+        setupTable();
         this.players = new HashMap<String, PlayerObject>();
+        playerConfig = new PlayerConfig();
         registerEvents();
     }
 
     private void registerEvents(){
+        plugin.getServer().getPluginManager().registerEvents(this, plugin);
         new OnLeave(plugin, database, players, playerConfig);
         new OnDeath(plugin, database, players, playerConfig);
     }
 
     private void setupTable(){
-        String tableCreate = "CREATE TABLE IF NOT EXISTS " + dbTable + " (" + // make sure to put your table name in here too.
-            "`id` varchar(32) NOT NULL," +
+        String tableCreate = "CREATE TABLE IF NOT EXISTS " + this.dbTable + " (" + // make sure to put your table name in here too.
+            "`id` varchar(40) NOT NULL," +
             "`name` varchar(32) NOT NULL," +
             "`wallet` int(16) NOT NULL," +
             "`killsInThisLife` int(11) NOT NULL," +
@@ -54,11 +57,11 @@ public class PlayerHandler implements Listener {
             "`playerDescription` varchar(256) NOT NULL," +
             "PRIMARY KEY (`id`)" +  // This is creating 3 colums Player, Kills, Total. Primary key is what you are going to use as your indexer. Here we want to use player so
             ");";
-        database.load(tableCreate);
+        this.database.load(tableCreate);
     }
 
-    public void updateNewPlayer(PlayerObject player, String data){
-        database.SetTable(dbTable, fullColumns, data);
+    public void updateNewPlayer(String data){
+        database.SetTable(this.dbTable, this.fullColumns, data);
     }
     public void returningPlayer(PlayerObject player, Map<String, String> playerData){
         player.setPlayerWallet(Integer.parseInt(playerData.get("wallet")));
@@ -78,7 +81,7 @@ public class PlayerHandler implements Listener {
     @EventHandler
     public void OnJoin(PlayerJoinEvent event){
         Player newPlayer = event.getPlayer();
-        PlayerObject player = new PlayerObject(newPlayer);
+        PlayerObject player = new PlayerObject(newPlayer, database, this.dbTable, playerConfig);
         String playerID = newPlayer.getUniqueId().toString();
         String playerName = newPlayer.getDisplayName();
         boolean playerInDB = false;
@@ -89,7 +92,7 @@ public class PlayerHandler implements Listener {
         }
         try {
             if (!playerInDB){
-                updateNewPlayer(player, player.getNewPlayerTable());
+                updateNewPlayer(player.getNewPlayerTable());
                 newPlayer.sendMessage("Welcome " + playerName + " to S8 New World!\n" +
                         "If you need any help, check out our discord: DISCORD\n" +
                         "Be sure to check out our rules with /rules, within discord, or WEBSITE");

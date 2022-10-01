@@ -20,12 +20,12 @@ public class MariaDB extends Database {
     private static FileConfiguration databaseConfigurationFile;
     public MariaDB(S8_RolePlay_Overhaul instance, DBConfig databaseConfig){
         super(instance);
-        address = databaseConfig.getDBConfiguration("Database Address (IP or FQDN)");
-        dbname =  databaseConfig.getDBConfiguration("Database Name");
-        username = databaseConfig.getDBConfiguration("Database Username");
-        password =  databaseConfig.getDBConfiguration("Database Password");
-        port = Integer.parseInt(databaseConfig.getDBConfiguration("Database Port"));
-        tablePrefix =  databaseConfig.getDBConfiguration("Database Table Prefix");
+        address = databaseConfig.getConfigString("Database Address (IP or FQDN)");
+        dbname =  databaseConfig.getConfigString("Database Name");
+        username = databaseConfig.getConfigString("Database Username");
+        password =  databaseConfig.getConfigString("Database Password");
+        port = databaseConfig.getConfigInteger("Database Port");
+        tablePrefix =  databaseConfig.getConfigString("Database Table Prefix");
     }
     public Connection getSQLConnection() {
         try {

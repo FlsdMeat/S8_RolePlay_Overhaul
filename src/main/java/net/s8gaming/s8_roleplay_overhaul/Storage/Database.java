@@ -91,7 +91,8 @@ public abstract class Database {
             rsmd = rs.getMetaData();
             try{
                 for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-                    map.put(rsmd.getCatalogName(i), rs.getString(i));
+                    map.put(rsmd.getColumnLabel(i), rs.getString(i));
+                    plugin.getLogger().info(rsmd.getColumnLabel(i) + ", " + rs.getString(i));
                 }
                 map.put("Result", "True");
                 return map;
@@ -112,25 +113,42 @@ public abstract class Database {
 
     public void SetTable(String table, String columns, String data){
         Connection conn = null;
-        PreparedStatement ps = null;
+        Statement s = null;
         try {
             conn = getSQLConnection();
-            ps = conn.prepareStatement("INSERT INTO " + table + " " + columns + " VALUES " + data); // IMPORTANT. In SQLite class, We made 3 colums. player, Kills, Total.
-            ps.executeQuery();
-            return;
+            s = conn.createStatement();
+            s.executeUpdate("INSERT INTO " + table + " " + columns + " VALUES " + data);
+            s.close();
         } catch (SQLException ex) {
-            plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), ex);
+            plugin.getLogger().log(Level.SEVERE, "Storage wasn't able to push new data: ", ex);
         } finally {
             try {
-                if (ps != null)
-                    ps.close();
                 if (conn != null)
                     conn.close();
             } catch (SQLException ex) {
                 plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionClose(), ex);
             }
         }
-        return;
+    }
+
+    public void UpdateTable(String table, String statement){
+        Connection conn = null;
+        Statement s = null;
+        try {
+            conn = getSQLConnection();
+            s = conn.createStatement();
+            s.executeUpdate("UPDATE " + table + " SET " + statement);
+            s.close();
+        } catch (SQLException ex) {
+            plugin.getLogger().log(Level.SEVERE, "Storage wasn't able to push new data: ", ex);
+        } finally {
+            try {
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException ex) {
+                plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionClose(), ex);
+            }
+        }
     }
 
     public void close(PreparedStatement ps,ResultSet rs){

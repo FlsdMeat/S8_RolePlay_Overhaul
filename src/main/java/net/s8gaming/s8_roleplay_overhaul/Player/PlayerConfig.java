@@ -9,6 +9,8 @@ public class PlayerConfig extends LoadConfigurationFiles {
         super();
         fileName = "playerConfig";
         setup();
+        config().addDefault("New Player.Wallet", 500);
+        //Death Options
         config().addDefault("Death Options.Rollback Inventory.enabled", false);
         config().addDefault("Death Options.Rollback Inventory.Limit", 7);
         config().setComments("Death Options.Rollback Inventory.Limit", Collections.singletonList("After the limit is reached, the oldest save will be removed"));
@@ -22,8 +24,5 @@ public class PlayerConfig extends LoadConfigurationFiles {
         config().setComments("Death Options.Death Chest.Limit", Collections.singletonList("How many chests can stay in world"));
         config().options().copyDefaults(true);
         save();
-    }
-    public String getConfigItem(String configOption){
-        return (String) config().get(configOption);
     }
 }

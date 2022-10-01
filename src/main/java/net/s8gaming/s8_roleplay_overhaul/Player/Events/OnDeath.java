@@ -27,10 +27,10 @@ public class OnDeath extends PlayerEvents implements Listener {
         assert victim != null;
         PlayerObject victimObject = players.get(victim.getUniqueId().toString());
         victimObject.increasePlayerDeaths();
-        if(Boolean.parseBoolean(playerConfig.getConfigItem("Death Options.Death Chest.enabled"))){
+        if(playerConfig.getConfigBoolean("Death Options.Death Chest.enabled")){
             new DeathChest(victim, victimObject, playerConfig);
         }
-        if(Boolean.parseBoolean(playerConfig.getConfigItem("Death Options.Rollback Inventory.enabled"))){
+        if(playerConfig.getConfigBoolean("Death Options.Rollback Inventory.enabled")){
             new InventoryRollback(victim, victimObject, playerConfig);
         }
     }

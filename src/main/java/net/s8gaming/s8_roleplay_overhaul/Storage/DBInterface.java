@@ -17,8 +17,8 @@ public class DBInterface {
 
     public DBInterface(S8_RolePlay_Overhaul instance, DBConfig databaseConfig){
         plugin = instance;
-        dbType = databaseConfig.getDBConfiguration("dbType");
-        dbTablePrefix = databaseConfig.getDBConfiguration("tablePrefix");
+        dbType = databaseConfig.getConfigString("Database Type");
+        this.dbTablePrefix = databaseConfig.getConfigString("Database Table Prefix");
         try{
             if (dbType.equals("SQLite")){
                 sqLiteDB = new SQLite(plugin);
@@ -38,11 +38,12 @@ public class DBInterface {
 
     public boolean checkIfItemExists(String table, String column, String colMatch){
         try{
-            switch (dbType){
-                case "SQLite":
+            if(dbType.equals("SQLite")) {
                     return sqLiteDB.checkIfItemExists(table, column, colMatch);
-                case "MariaDB":
+            } else if (dbType.equals("MariaDB")) {
                     return mariaDB.checkIfItemExists(table, column, colMatch);
+            } else {
+                plugin.getLogger().warning("DBInterface warning in checkIfItemExists");
             }
         }catch( Exception exception){
             plugin.getLogger().log(Level.SEVERE, "DBInterface could not retrieve data properly: ", exception);
@@ -54,11 +55,12 @@ public class DBInterface {
         Map<String, String> map = new HashMap<String, String>();
         map.put("Result", "False");
         try{
-            switch (dbType){
-                case "SQLite":
+            if(dbType.equals("SQLite")) {
                     map = sqLiteDB.getCellValues(column, colMatch, table);
-                case "MariaDB":
+            } else if (dbType.equals("MariaDB")) {
                     map = mariaDB.getCellValues(column, colMatch, table);
+            } else {
+                plugin.getLogger().warning("DBInterface warning in getTableData");
             }
         }catch( Exception exception){
             plugin.getLogger().log(Level.SEVERE, "DBInterface could not retrieve data properly: ", exception);
@@ -68,11 +70,25 @@ public class DBInterface {
 
     public void SetTable(String table, String columns, String data){
         try{
-            switch (dbType){
-                case "SQLite":
+            if(dbType.equals("SQLite")) {
                     sqLiteDB.SetTable(table, columns, data);
-                case "MariaDB":
+            } else if (dbType.equals("MariaDB")) {
                     mariaDB.SetTable(table, columns, data);
+            } else {
+                plugin.getLogger().warning("DBInterface warning in SetTable");
+            }
+        }catch( Exception exception){
+            plugin.getLogger().log(Level.SEVERE, "DBInterface could not set data properly: ", exception);
+        }
+    }
+    public void UpdateTable(String table, String statement){
+        try{
+            if(dbType.equals("SQLite")) {
+                sqLiteDB.UpdateTable(table, statement);
+            } else if (dbType.equals("MariaDB")) {
+                mariaDB.UpdateTable(table, statement);
+            } else {
+                plugin.getLogger().warning("DBInterface warning in UpdateTable");
             }
         }catch( Exception exception){
             plugin.getLogger().log(Level.SEVERE, "DBInterface could not update data properly: ", exception);
@@ -80,11 +96,12 @@ public class DBInterface {
     }
     public void load(String tableCreation){
         try{
-            switch (dbType){
-                case "SQLite":
-                    sqLiteDB.load(tableCreation);
-                case "MariaDB":
-                    mariaDB.load(tableCreation);
+            if(dbType.equals("SQLite")) {
+                sqLiteDB.load(tableCreation);
+            } else if (dbType.equals("MariaDB")) {
+                mariaDB.load(tableCreation);
+            } else {
+                plugin.getLogger().warning("DBInterface warning in load");
             }
         } catch (Exception exception){
             plugin.getLogger().log(Level.SEVERE, "DBInterface could not create tables properly: ", exception);
@@ -93,7 +110,7 @@ public class DBInterface {
     }
 
     public String getDBTablePrefix(){
-        return dbTablePrefix;
+        return this.dbTablePrefix;
     }
 
 }

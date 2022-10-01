@@ -25,6 +25,18 @@ public abstract class LoadConfigurationFiles {
         }
         configFileObject = YamlConfiguration.loadConfiguration(configFile);
     }
+    public String getConfigString(String configOption){
+        return (String) config().get(configOption);
+    }
+    public Boolean getConfigBoolean(String configOption){
+        return (Boolean) config().get(configOption);
+    }
+    public Integer getConfigInteger(String configOption){
+        return (Integer) config().get(configOption);
+    }
+    public Float getConfigFloat(String configOption){
+        return (Float) config().get(configOption);
+    }
     public static FileConfiguration config(){
         return configFileObject;
     }

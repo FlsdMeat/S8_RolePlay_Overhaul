@@ -48,6 +48,7 @@ public class SQLite extends Database {
         connection = getSQLConnection();
         try {
             Statement s = connection.createStatement();
+            plugin.getLogger().info(tableCreation);
             s.executeUpdate(tableCreation);
             s.close();
         } catch (SQLException e) {

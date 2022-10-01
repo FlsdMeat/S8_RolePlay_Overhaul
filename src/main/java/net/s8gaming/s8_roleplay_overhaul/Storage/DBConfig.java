@@ -16,12 +16,9 @@ public class DBConfig extends LoadConfigurationFiles{
         config().addDefault("Database Username", "root");
         config().addDefault("Database Password", "password123!");
         config().addDefault("Database Name", "MinecraftDatabase");
-        config().addDefault("Database Table Prefix", "s8PlayerOverhaul_");
+        config().addDefault("Database Table Prefix", "s8PlayerOverhaul");
         config().setComments("Database Table Prefix", Collections.singletonList("// If preferred, what would the table prefix start as for each of the data collections made by the plugin"));
         config().options().copyDefaults(true);
         save();
-    }
-    public String getDBConfiguration(String configOption){
-        return (String) config().get(configOption);
     }
 }

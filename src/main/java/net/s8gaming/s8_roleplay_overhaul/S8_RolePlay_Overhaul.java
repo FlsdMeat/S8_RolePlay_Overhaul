@@ -4,7 +4,10 @@ import net.s8gaming.s8_roleplay_overhaul.Player.Commands.Status;
 import net.s8gaming.s8_roleplay_overhaul.Player.PlayerHandler;
 import net.s8gaming.s8_roleplay_overhaul.Storage.DBInterface;
 import net.s8gaming.s8_roleplay_overhaul.Storage.DBConfig;
+import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.logging.Level;
 
 public final class S8_RolePlay_Overhaul extends JavaPlugin {
     @Override
@@ -13,6 +16,7 @@ public final class S8_RolePlay_Overhaul extends JavaPlugin {
         getConfig().options().copyDefaults();
         saveDefaultConfig();
         LoadCommands();
+        this.getLogger().info("Starting up modules...");
         StartUpModules(new DBConfig());
     }
 

@@ -1,11 +1,14 @@
 package net.s8gaming.s8_roleplay_overhaul.Player;
 
+import net.s8gaming.s8_roleplay_overhaul.Storage.DBInterface;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class PlayerObject{
+    private final DBInterface database;
+    private final String playerTable;
     private final String playerID;
     public String playerName;
     private Integer playerWallet;
@@ -20,10 +23,12 @@ public class PlayerObject{
     private Integer blocksBroken;
     private Integer playerDeaths;
     private String playerDescription;
-    public PlayerObject(Player player){
+    public PlayerObject(Player player, DBInterface database, String playerTable, PlayerConfig playerConfig){
+        this.database = database;
+        this.playerTable = playerTable;
         this.playerID = player.getUniqueId().toString();
         this.playerName = player.getName();
-        this.playerWallet = 0;
+        this.playerWallet = playerConfig.getConfigInteger("New Player.Wallet");
         this.playerKillsInThisLife = 0;
         this.totalPlayerKills = 0;
         this.longestLife = "None";
@@ -38,20 +43,20 @@ public class PlayerObject{
     }
 
     public String getNewPlayerTable(){
-        return this.playerID + ", " +                        // id
-                this.playerName + ", " +                     // name
+        return "('" + this.playerID + "', '" +                        // id
+                this.playerName + "', " +                     // name
                 this.playerWallet + ", " +                   // wallet
                 this.playerKillsInThisLife + ", "+           // killsInLife
-                this.totalPlayerKills + ", " +               // totalKills
-                this.longestLife + ", " +                    // longestLife
-                this.lastDeath + ", " +                      // lastDeath
-                this.totalMobKills + ", " +                  // totalMobKills
-                this.mostKilledMob + ", " +                  // mostKilledMob
-                this.mostKilledMonster + ", " +              // mostKilledMonster
+                this.totalPlayerKills + ", '" +               // totalKills
+                this.longestLife + "', '" +                    // longestLife
+                this.lastDeath + "', " +                      // lastDeath
+                this.totalMobKills + ", '" +                  // totalMobKills
+                this.mostKilledMob + "', '" +                  // mostKilledMob
+                this.mostKilledMonster + "', " +              // mostKilledMonster
                 this.distancedTraveled + ", " +              // distancedTraveled
                 this.blocksBroken + ", " +                   // blocksBroken
-                this.playerDeaths + ", " +                   // playerDeaths
-                this.playerDescription + ");";
+                this.playerDeaths + ", '" +                   // playerDeaths
+                this.playerDescription + "');";
     }
 
     public String getPlayerID(){
@@ -129,6 +134,7 @@ public class PlayerObject{
     }
     public void increasePlayerDeaths() {
         this.playerDeaths += 1;
+        UpdateIntegerTable("deaths", this.playerDeaths);
     }
     public Integer getPlayerDeaths() {
         return this.playerDeaths;
@@ -147,5 +153,11 @@ public class PlayerObject{
     }
     public Integer getBlocksBroken() {
         return this.blocksBroken;
+    }
+
+    private void UpdateIntegerTable(String column, Integer value){
+        this.database.UpdateTable(
+                this.playerTable,
+                column + " = " + value + " WHERE id = '" + this.playerID + "';");
     }
 }
