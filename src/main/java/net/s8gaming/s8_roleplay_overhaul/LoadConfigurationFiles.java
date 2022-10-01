@@ -8,15 +8,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 
-public class LoadConfigurationFiles {
+public abstract class LoadConfigurationFiles {
     static S8_RolePlay_Overhaul plugin;
-    private static File configFile;
-    private static FileConfiguration configFileObject;
-    private String fileName;
-    public LoadConfigurationFiles(String fileName){
-        this.fileName = fileName;
-    }
-
+    public static File configFile;
+    public static FileConfiguration configFileObject;
+    public static String fileName;
     public void setup(){
         configFile = new File(Bukkit.getServer().getPluginManager().getPlugin("S8_Roleplay_Overhaul").getDataFolder(), fileName + ".yml");
 
@@ -29,7 +25,7 @@ public class LoadConfigurationFiles {
         }
         configFileObject = YamlConfiguration.loadConfiguration(configFile);
     }
-    public static FileConfiguration get(){
+    public static FileConfiguration config(){
         return configFileObject;
     }
 

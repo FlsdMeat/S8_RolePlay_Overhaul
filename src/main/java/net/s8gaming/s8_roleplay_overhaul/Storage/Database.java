@@ -4,37 +4,50 @@ import net.s8gaming.s8_roleplay_overhaul.S8_RolePlay_Overhaul;
 import net.s8gaming.s8_roleplay_overhaul.ErrorHandling.Error;
 import net.s8gaming.s8_roleplay_overhaul.ErrorHandling.Errors;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
-
-import org.bukkit.entity.Player;
 
 public abstract class Database {
     public S8_RolePlay_Overhaul plugin;
     public Connection connection;
-    public String table = "table_name"; //"default" name for a table within a database
-    public int tokens = 0;
     public Database(S8_RolePlay_Overhaul instance){
         plugin = instance;
     }
 
     public abstract Connection getSQLConnection(); //default abstraction to connect to a sql database
 
-    public void initialize(){
-        connection = getSQLConnection();
-        try { //default statement for getting data base upon player id or just player in general
-            PreparedStatement ps = connection.prepareStatement("SELECT * FROM " + table + " WHERE player = ?");
-            ResultSet rs = ps.executeQuery();
-            close(ps, rs);
+    public boolean checkIfItemExists(String table, String column, String colMatch){
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try{
+            conn = getSQLConnection();
+            ps = conn.prepareStatement("SELECT " + column + " FROM " + table + " WHERE " + column + " = '" + colMatch + "';");
+            rs = ps.executeQuery();
+            while(rs.next()){
+                if(rs.getString(column).equalsIgnoreCase(colMatch.toLowerCase())){
+                    return true; // Return true if item in column exists,
+                }
+            }
         } catch (SQLException exception){
-            plugin.getLogger().log(Level.SEVERE, "Unable to retrieve connection", exception);
+            plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), exception);
+        } finally {
+            try{
+                if ( ps != null ){
+                    ps.close();
+                }
+                if (conn != null){
+                    conn.close();
+                }
+            } catch (SQLException exception){
+                plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionClose(), exception);
+            }
         }
+        return false;
     }
-
-    public Integer getCellIntegerValue(String column, String colMatch, String cell){
+    public Integer getCellIntegerValue(String table, String column, String colMatch, String cell){
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -63,30 +76,63 @@ public abstract class Database {
         }
         return 0;
     }
-    public void setCellValue(Player player, Integer tokens, Integer total){
+
+    public Map<String, String> getCellValues(String column, String colMatch, String table){
         Connection conn = null;
         PreparedStatement ps = null;
+        ResultSet rs = null;
+        ResultSetMetaData rsmd = null;
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("Result", "False");
         try{
             conn = getSQLConnection();
-            ps = conn.prepareStatement("REPLACE INTO " + table + " (player,kills,total) VALUES(?,?,?)");
-            ps.setString(1, player.getName().toLowerCase());
-            ps.setInt(2, tokens);
-            ps.setInt(3, total);
+            ps = conn.prepareStatement("SELECT * FROM " + table + " WHERE " + column + " = '" + colMatch + "';");
+            rs = ps.executeQuery();
+            rsmd = rs.getMetaData();
+            try{
+                for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+                    map.put(rsmd.getCatalogName(i), rs.getString(i));
+                }
+                map.put("Result", "True");
+                return map;
+            } catch (Exception exception) {
+                plugin.getLogger().log(Level.SEVERE, "Database had an issue with getCellValues", exception);
+            }
         } catch (SQLException exception){
             plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), exception);
         } finally {
-            try {
-                if (ps != null) {
-                    ps.close();
-                }
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException exception){
-                plugin.getLogger().log(Level.SEVERE,  Errors.sqlConnectionClose(), exception);
+            try{
+                close(ps, rs);
+            } catch (Exception exception){
+                plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionClose(), exception);
             }
         }
+        return map;
     }
+
+    public void SetTable(String table, String columns, String data){
+        Connection conn = null;
+        PreparedStatement ps = null;
+        try {
+            conn = getSQLConnection();
+            ps = conn.prepareStatement("INSERT INTO " + table + " " + columns + " VALUES " + data); // IMPORTANT. In SQLite class, We made 3 colums. player, Kills, Total.
+            ps.executeQuery();
+            return;
+        } catch (SQLException ex) {
+            plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionExecute(), ex);
+        } finally {
+            try {
+                if (ps != null)
+                    ps.close();
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException ex) {
+                plugin.getLogger().log(Level.SEVERE, Errors.sqlConnectionClose(), ex);
+            }
+        }
+        return;
+    }
+
     public void close(PreparedStatement ps,ResultSet rs){
         try {
             if (ps != null)
